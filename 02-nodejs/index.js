@@ -4,24 +4,36 @@ Obter o numero de telefone de um user a partir do seu ID
 Obter o endereço do usuario pelo ID
  */
 
- function getUser(callback) {
-    setTimeout(function () {
-       return callback(null, {
-          id: 1,
-          name: 'Leo',
-          dateBirth: new Date()
-       })     
-    }, 1000)
+ //importamos um modulo interno do node.js
+ const util = require('util');
+ const getAdressAsync = util.promisify(getAdress)
+
+
+ function getUser() {
+    //quando der algum problema -> reject(erro)
+    //quando rodar -> resolv
+    return new Promise(function resolvePromise(resolve, reject){
+      setTimeout(function () {
+      // return reject(new Error ('Houston we have a problem!'))
+
+         return resolve({
+            id: 1,
+            name: 'Leo',
+            dateBirth: new Date()
+         })     
+      }, 1000)
+    })   
  }
 
- function getPhone(idUser, callback) {
+ function getPhone(idUser) {
+    return new Promise(function resolvePromise(resolve, reject) {
       setTimeout(() => {
-         return callback(null, {
+         return resolve({
             phone: '996941313',
             ddd: 13
          })
-
       }, 2000);
+    })   
  }
 
  function getAdress(idUser, callback) {
@@ -35,6 +47,46 @@ Obter o endereço do usuario pelo ID
 
  }
 
+ const userPromise = getUser()
+ //para manipular sucesso usamos a função .then
+ //para manipular erros usamos o .catch
+ userPromise
+      //captura o user e o telefone também
+      .then(function (resultado) {
+         return getPhone(resultado.id)
+            .then(function solvePhone(result) {
+               return {
+                  user: {
+                     name: resultado.name,
+                     id: resultado.id
+                  },
+                  phone: result 
+               }
+
+            })
+      })
+      .then(function (resultado) {
+         const adress = getAdressAsync(resultado.user.id)
+         return adress.then(function solveAdress(result) {
+            return {
+               user: resultado.user,
+               phone: resultado.phone,
+               adress: result
+            }
+         });
+      })
+      .then(function (result) {
+         console.log(`
+         Name: ${result.user.name}
+         Adress: ${result.adress.street}, ${result.adress.number}
+         Phone: (${result.phone.ddd}) ${result.phone.phone}
+         `)
+      })
+      .catch(function (error) {
+         console.log('Error', error)
+      })
+
+ /** 
  getUser(function solveUser(error, user) {
     // null || "" || 0 === false 
     if(error) {
@@ -63,3 +115,5 @@ Obter o endereço do usuario pelo ID
 
  //console.log('user', user)
  //console.log('phone', phone)
+
+ */
