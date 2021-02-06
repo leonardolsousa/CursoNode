@@ -47,6 +47,33 @@ Obter o endereço do usuario pelo ID
 
  }
 
+ //adiconar a palavra async -> automaticamente ela retornará uma promise
+ main()
+ async function main() {
+    try {
+       console.time('medida-promise')
+         const user = await getUser()
+         //const phone = await getPhone(user.id)
+         //const adress = await getAdressAsync(user.id)
+         const resultado = await Promise.all([
+            getPhone(user.id),
+            getAdressAsync(user.id)
+         ])
+         const adress = resultado [1]
+         const phone = resultado [0]
+         console.log(`
+            Name: ${user.name},
+            Phone: (${phone.ddd}) ${phone.phone},
+            Adress: ${adress.street}, ${adress.number}
+         `)
+         console.timeEnd('medida-promise')
+
+    } catch (error) {
+       console.error('Not Found', error)
+    }
+ }
+
+ /** 
  const userPromise = getUser()
  //para manipular sucesso usamos a função .then
  //para manipular erros usamos o .catch
@@ -117,3 +144,5 @@ Obter o endereço do usuario pelo ID
  //console.log('phone', phone)
 
  */
+
+ 
